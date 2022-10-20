@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Uthef.MusicResolver
+﻿namespace Uthef.MusicResolver
 {
     public class SearchItem
     {   
@@ -9,6 +7,8 @@ namespace Uthef.MusicResolver
         public string Title { get; }
         public List<string> Artists { get; }
         public string? ArtworkUrl { get; }
+
+        public bool HasArtwork { get => ArtworkUrl != null; }
 
         public MusicService Service { get; }
 

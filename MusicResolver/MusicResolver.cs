@@ -12,6 +12,7 @@ using YoutubeExplode;
 using YoutubeExplode.Common;
 using Uthef.MusicReolver.SoundCloudModels;
 using Uthef.MusicReolver.BandcampModels;
+using System.Collections.Immutable;
 
 namespace Uthef.MusicResolver
 {
@@ -82,7 +83,9 @@ namespace Uthef.MusicResolver
         public async Task<SearchResult> SearchAsync
             (string query, ItemType itemType, ServicePack pack, IMusicResolverFilter? filter = null)
         {
-            var searchResultCollection = new SearchResult(itemType);
+            List<SearchItem> searchItems = new();
+            List<ExceptionView> exceptions = new();
+
             List<Task> tasks = new();
 
             foreach (var service in pack.Items)
@@ -94,16 +97,17 @@ namespace Uthef.MusicResolver
                     if (!task.IsCompletedSuccessfully)
                     {
                         if (task.Exception != null)
-                            searchResultCollection.Exceptions.Add(new ExceptionView(task.Exception.Message, service));
+                            exceptions.Add(new ExceptionView(task.Exception.Message, service));
+
                         return;
                     }
-                        
+
                     foreach (var result in task.Result)
                     {
                         if (filter != null && !filter.IsItemValid(result, itemType))
                             continue;
 
-                        searchResultCollection.Items.Add(result);
+                        searchItems.Add(result);
                         break;
                     }
                 });
@@ -115,9 +119,9 @@ namespace Uthef.MusicResolver
             {
                 await Task.WhenAll(tasks);
             }
-            finally { }
-            
-            return searchResultCollection;
+            catch { }
+
+            return new SearchResult(itemType, searchItems.ToImmutableList(), exceptions.ToImmutableList());
         }
 
         #region Yandex

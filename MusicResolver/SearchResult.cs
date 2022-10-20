@@ -1,16 +1,19 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 
 namespace Uthef.MusicResolver
 {
     public class SearchResult
     {
         public ItemType Type { get; }
-        public SearchResult(ItemType type)
+        public SearchResult(ItemType type, ImmutableList<SearchItem> items, ImmutableList<ExceptionView> exceptions)
         {
             Type = type;
+            Items = items;
+            Exceptions = exceptions;
         }
 
-        public List<SearchItem> Items { get; } = new();
-        public List<ExceptionView> Exceptions { get; } = new();
+        public ImmutableList<SearchItem> Items { get; }
+        public ImmutableList<ExceptionView> Exceptions { get; }
     }
 }

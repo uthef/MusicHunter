@@ -11,7 +11,7 @@
         public MusicResolverConfiguration(
             string? spotifyClientId = null, 
             string? spotifyClientSecret = null, 
-            string? soundCloudClientId = null,
+            string? soundCloudClientId = "jOJjarVXJfZlI309Up55k93EUDG7ILW6",
             bool useSoundCloudProxy = false)
         {
             SpotifyClientId = spotifyClientId;

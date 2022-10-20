@@ -18,8 +18,7 @@ namespace MusicResolverTests
                 new MusicResolverConfiguration(
                     spotifyClientId: "c65a78a3e14048edaecd6858adf234cc",
                     spotifyClientSecret: "3aed4954a11a4214ac2b3f4fff435d2a",
-                    soundCloudClientId: "KghzQtan1SZyxSkNGHNepznp7GWgaYMG",
-                    true
+                    useSoundCloudProxy: true
                 )
             );
 
@@ -71,7 +70,6 @@ namespace MusicResolverTests
                 );
 
                 Assert.Fail("The inner exception(s) occurred");
-
             }
 
             TestContext.WriteLine("The following items have been found:");
