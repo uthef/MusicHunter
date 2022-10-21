@@ -1,6 +1,6 @@
 # MusicResolver
 
-### Supported services:
+### Supported services
 * Yandex Music API
 * Apple Music API
 * Deezer API
