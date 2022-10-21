@@ -13,6 +13,11 @@ using YoutubeExplode.Common;
 using Uthef.MusicReolver.SoundCloudModels;
 using Uthef.MusicReolver.BandcampModels;
 using System.Collections.Immutable;
+using HtmlAgilityPack;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
+using System.Text;
 
 namespace Uthef.MusicResolver
 {
@@ -37,7 +42,8 @@ namespace Uthef.MusicResolver
 
         private readonly Dictionary<MusicService, SearchMethod> _methods = new();
         private readonly MusicResolverConfiguration _configuration;
-        private readonly Regex _artworkResolutionPattern = new("((%%|(\\d+x\\d+)))(?!.*(%%|(\\d+x\\d+)))");
+        private readonly Regex _artworkResolutionPattern = new("((%%|(\\d+x\\d+)))(?!.*(%%|(\\d+x\\d+)))", RegexOptions.Compiled);
+        private readonly Regex _amazonQueryRegex = new("(?<=trackAsin=).+?(?=&)", RegexOptions.Compiled);
 
         public MusicResolver(MusicResolverConfiguration config)
         {
@@ -60,7 +66,8 @@ namespace Uthef.MusicResolver
             _yandexMusicResolver = new YandexMusicMainResolver(new EmptyYandexConfig());
             _deezerResolver = DeezerSession.CreateNew();
             _iTunesSearchManager = new iTunesSearchManager();
-            _httpClient = new HttpClient();
+            var clientHandler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+            _httpClient = new HttpClient(clientHandler);
             _ytClient = new YoutubeClient();
 
             if (_configuration.SpotifyClientId != null && _configuration.SpotifyClientSecret != null)
@@ -459,6 +466,62 @@ namespace Uthef.MusicResolver
 
             return searchResultCollection;
 
+        }
+        #endregion
+
+        #region Amazon
+        [MethodOf(MusicService.Amazon)]
+        public async Task<SearchItemList> SearchAmazonAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        {
+            var list = new SearchItemList(itemType);
+            var type = itemType is ItemType.Track ? "track" : "album";
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"https://amazon.com/s?k={query}&i=digital-music-{type}");
+            request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0");
+            
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var document = new HtmlDocument();
+            document.Load(await response.Content.ReadAsStreamAsync());
+
+            var cards = document.DocumentNode.SelectNodes("//div[contains(@class, \"s-card-container\")]");
+
+            if (cards is null) return list;
+
+            var lim = Math.Min(cards.Count, limit);
+
+            for (int i = 0; i < lim; i++)
+            {
+                var card = cards[i];
+
+                var rows = card.SelectNodes("//div[@class=\"a-row\"]");
+                var links = card.SelectNodes("//a[contains(@class, \"a-link-normal\") and contains(@class, \"s-underline-text\")]");
+
+                var title = links.First().InnerText.Trim();
+                var artist = rows.First().ChildNodes.Last().InnerText;
+
+                var queryPart = links[2].Attributes["href"].Value.Split("/").Last();
+                var uri = new Uri($"https://music.amazon.com/albums/{queryPart}");
+                var url = uri.GetLeftPart(UriPartial.Path);
+                string id = "";
+
+                if (itemType is ItemType.Track)
+                {
+                    id = _amazonQueryRegex.Match(uri.Query).Value;
+                    url += $"?trackAsin={id}";
+                }
+                else
+                {
+                    var qMarkIndex = queryPart.IndexOf("?");
+                    id = queryPart.Remove(qMarkIndex, queryPart.Length - qMarkIndex);
+                }
+
+
+                list.Add(new SearchItem(id, url, title, artist, MusicService.Amazon));
+            }
+
+            return list;
         }
         #endregion
 

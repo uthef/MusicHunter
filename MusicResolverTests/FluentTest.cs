@@ -1,4 +1,5 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.Collections.Immutable;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 using Uthef.MusicResolver;
@@ -59,6 +60,14 @@ namespace MusicResolverTests
             var servicePack = MusicService.Bandcamp;
             var resultCollection = await MusicResolver.SearchAsync(query, type, servicePack);
             AssertWithOutput(resultCollection, servicePack);
+        }
+
+        [TestCase("david galloway - we wait so long to begin", ItemType.Album)]
+        [TestCase("machine head - circle the drain", ItemType.Track)]
+        public async Task TestAmazon(string query, ItemType itemType)
+        {
+            var r = await MusicResolver.SearchAsync(query, itemType, MusicService.Amazon);
+            AssertWithOutput(r, MusicService.Amazon);
         }
 
         private void AssertWithOutput(SearchResult resultCollection, ServicePack pack)
