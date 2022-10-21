@@ -476,7 +476,7 @@ namespace Uthef.MusicResolver
             var list = new SearchItemList(itemType);
             var type = itemType is ItemType.Track ? "track" : "album";
 
-            using var request = new HttpRequestMessage(HttpMethod.Get, $"https://amazon.com/s?k={query}&i=digital-music-{type}");
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"https://amazon.com/s?k={query}&i=digital-music-{type}&dc");
             request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0");
             
             var response = await _httpClient.SendAsync(request);
