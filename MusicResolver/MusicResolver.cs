@@ -10,14 +10,11 @@ using E.Deezer.Api;
 using SpotifyAPI.Web;
 using YoutubeExplode;
 using YoutubeExplode.Common;
-using Uthef.MusicReolver.SoundCloudModels;
-using Uthef.MusicReolver.BandcampModels;
+using Uthef.MusicResolver.SoundCloudModels;
+using Uthef.MusicResolver.BandcampModels;
 using System.Collections.Immutable;
 using HtmlAgilityPack;
 using System.Net;
-using System.Runtime.InteropServices;
-using System.Text.Encodings.Web;
-using System.Text;
 
 namespace Uthef.MusicResolver
 {

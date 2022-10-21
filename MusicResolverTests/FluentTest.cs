@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Text.Encodings.Web;
+﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 using Uthef.MusicResolver;
@@ -34,7 +33,7 @@ namespace MusicResolverTests
         public async Task TestAll(string query, ItemType type)
         {
             var resultCollection = await MusicResolver.SearchAsync(query, type, ServicePack.All);
-            AssertWithOutput(resultCollection, ServicePack.All);
+            AssertSearchResultWithOutput(resultCollection, ServicePack.All);
         }
 
         [TestCase("celldweller - satellites", ItemType.Album, "celldweller", "satellites")]
@@ -43,7 +42,7 @@ namespace MusicResolverTests
             var filter = new StrictFilter(strictArtist, strictTitle);
 
             var resultCollection = await MusicResolver.SearchAsync(query, type, ServicePack.All, filter);
-            AssertWithOutput(resultCollection, ServicePack.All);
+            AssertSearchResultWithOutput(resultCollection, ServicePack.All);
         }
 
         [TestCase("ic3peak - грустная сука", ItemType.Track)]
@@ -51,7 +50,7 @@ namespace MusicResolverTests
         {
             var servicePack = MusicService.SoundCloud;
             var resultCollection = await MusicResolver.SearchAsync(query, type, servicePack);
-            AssertWithOutput(resultCollection, servicePack);
+            AssertSearchResultWithOutput(resultCollection, servicePack);
         }
 
         [TestCase("russian circles - empros", ItemType.Album)]
@@ -59,18 +58,18 @@ namespace MusicResolverTests
         {
             var servicePack = MusicService.Bandcamp;
             var resultCollection = await MusicResolver.SearchAsync(query, type, servicePack);
-            AssertWithOutput(resultCollection, servicePack);
+            AssertSearchResultWithOutput(resultCollection, servicePack);
         }
 
         [TestCase("david galloway - we wait so long to begin", ItemType.Album)]
         [TestCase("machine head - circle the drain", ItemType.Track)]
         public async Task TestAmazon(string query, ItemType itemType)
         {
-            var r = await MusicResolver.SearchAsync(query, itemType, MusicService.Amazon);
-            AssertWithOutput(r, MusicService.Amazon);
+            var result = await MusicResolver.SearchAsync(query, itemType, MusicService.Amazon);
+            AssertSearchResultWithOutput(result, MusicService.Amazon);
         }
 
-        private void AssertWithOutput(SearchResult resultCollection, ServicePack pack)
+        private void AssertSearchResultWithOutput(SearchResult resultCollection, ServicePack pack)
         {
             if (resultCollection.Exceptions.Count > 0)
             {
