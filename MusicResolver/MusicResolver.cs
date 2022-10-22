@@ -65,7 +65,7 @@ namespace Uthef.MusicResolver
             _iTunesSearchManager = new iTunesSearchManager();
             var clientHandler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
             _httpClient = new HttpClient(clientHandler);
-            _ytClient = new YoutubeClient();
+            _ytClient = new YoutubeClient(_httpClient);
 
             if (_configuration.SpotifyClientId != null && _configuration.SpotifyClientSecret != null)
             {
@@ -84,13 +84,12 @@ namespace Uthef.MusicResolver
             _httpClient.Dispose();
         }
 
-        public async Task<SearchResult> SearchAsync
-            (string query, ItemType itemType, ServicePack pack, IMusicResolverFilter? filter = null)
+        public async Task<SearchResult> SearchAsync(string query, ItemType itemType, 
+            ServicePack pack, IMusicResolverFilter? filter = null)
         {
             List<SearchItem> searchItems = new();
             List<ExceptionView> exceptions = new();
-
-            List<Task> tasks = new();
+            List<Task<SearchItemList>> tasks = new();
 
             foreach (var service in pack.Items)
             {
@@ -121,13 +120,18 @@ namespace Uthef.MusicResolver
                 tasks.Add(task);
             }
 
+            var overallStamp = DateTime.Now;
+
             try
             {
                 await Task.WhenAll(tasks);
             }
-            catch { }
+            catch 
+            { 
 
-            return new SearchResult(itemType, searchItems.ToImmutableList(), exceptions.ToImmutableList());
+            }
+
+            return new SearchResult(itemType, searchItems.ToImmutableList(), exceptions.ToImmutableList(), DateTime.Now - overallStamp);
         }
 
         #region Yandex
