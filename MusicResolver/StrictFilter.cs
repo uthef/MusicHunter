@@ -2,8 +2,8 @@
 {
     public sealed class StrictFilter : IMusicResolverFilter
     {
-        public readonly string? Artist;
-        public readonly string? Title;
+        public string? Artist { get; }
+        public string? Title { get; }
 
         public int Limit { get; }
 

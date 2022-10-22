@@ -95,7 +95,8 @@ namespace Uthef.MusicResolver
             foreach (var service in pack.Items)
             {
                 var task = _methods[service].Invoke(query, itemType, filter?.Limit ?? DefaultLimit);
-                
+                var stamp = DateTime.Now;
+
                 task.GetAwaiter().OnCompleted(() =>
                 {
                     if (!task.IsCompletedSuccessfully)
@@ -111,6 +112,7 @@ namespace Uthef.MusicResolver
                         if (filter != null && !filter.IsItemValid(result, itemType))
                             continue;
 
+                        result.ExecutionTime = DateTime.Now - stamp;
                         searchItems.Add(result);
                         break;
                     }

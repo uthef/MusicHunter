@@ -7,10 +7,9 @@
         public string Title { get; }
         public List<string> Artists { get; }
         public string? ArtworkUrl { get; }
-
         public bool HasArtwork { get => ArtworkUrl != null; }
-
         public MusicService Service { get; }
+        public TimeSpan ExecutionTime { get; internal set; }
 
         public SearchItem(string id, string url, string title, string artist, MusicService service)
         {
