@@ -15,6 +15,8 @@ using Uthef.MusicResolver.BandcampModels;
 using System.Collections.Immutable;
 using HtmlAgilityPack;
 using System.Net;
+using Uthef.MusicResolver.Filters;
+using YoutubeExplode.Videos;
 
 namespace Uthef.MusicResolver
 {
@@ -307,6 +309,7 @@ namespace Uthef.MusicResolver
                             $"{YouTubeUrlPart}/watch?v={video.Id}",
                             video.Title,
                             video.Author.ChannelTitle,
+                            video.Thumbnails.LastOrDefault()?.Url,
                             MusicService.YouTube
                         )
                     );
@@ -326,6 +329,7 @@ namespace Uthef.MusicResolver
                             $"{YouTubeUrlPart}/playlist?list={playlist.Id}",
                             playlist.Title,
                             author is null ? "" : author.ChannelTitle,
+                            playlist.Thumbnails.LastOrDefault()?.Url,
                             MusicService.YouTube
                         )
                     );
@@ -363,6 +367,7 @@ namespace Uthef.MusicResolver
                         item.Url,
                         item.Name,
                         item.Band,
+                        item.Image,
                         MusicService.Bandcamp
                     )
                 );
@@ -398,6 +403,7 @@ namespace Uthef.MusicResolver
                             track.ExternalUrls["spotify"],
                             track.Name,
                             track.Artists.Select(x => x.Name),
+                            track.Album.Images.FirstOrDefault()?.Url,
                             MusicService.Spotify
                         )
                     );
@@ -413,6 +419,7 @@ namespace Uthef.MusicResolver
                             album.ExternalUrls["spotify"],
                             album.Name,
                             album.Artists.Select(x => x.Name),
+                            album.Images.FirstOrDefault()?.Url,
                             MusicService.Spotify
                         )
                     );
@@ -461,6 +468,7 @@ namespace Uthef.MusicResolver
                             item.Link,
                             item.Title,
                             item.User.Name,
+                            item.ArtworkUrl,
                             MusicService.SoundCloud
                         )
                     );
@@ -500,6 +508,7 @@ namespace Uthef.MusicResolver
 
                 var rows = card.SelectNodes("//div[@class=\"a-row\"]");
                 var links = card.SelectNodes("//a[contains(@class, \"a-link-normal\") and contains(@class, \"s-underline-text\")]");
+                var imageUrl = card.SelectSingleNode("//img[@class=\"s-image\"]").Attributes["src"].Value;
 
                 var title = links.First().InnerText.Trim();
                 var artist = rows.First().ChildNodes.Last().InnerText;
@@ -521,7 +530,7 @@ namespace Uthef.MusicResolver
                 }
 
 
-                list.Add(new SearchItem(id, url, title, artist, MusicService.Amazon));
+                list.Add(new SearchItem(id, url, title, artist, imageUrl, MusicService.Amazon));
             }
 
             return list;

@@ -7,7 +7,6 @@
         public string Title { get; internal set; }
         public List<string> Artists { get; }
         public string? ArtworkUrl { get; }
-        public bool HasArtwork { get => ArtworkUrl != null; }
         public MusicService Service { get; }
         public TimeSpan ExecutionTime { get; internal set; }
 

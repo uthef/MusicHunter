@@ -13,12 +13,16 @@ namespace Uthef.MusicResolver.BandcampModels
         [JsonPropertyName("item_url_path")]
         public string Url { get; }
 
-        public BandcampItem(long id, string name, string band, string url)
+        [JsonPropertyName("img")]
+        public string? Image { get; }
+
+        public BandcampItem(long id, string name, string band, string url, string? image)
         {
             Id = id;
             Name = name;
             Band = band;
             Url = url;
+            Image = image?.Replace("img/", "img/a");
         }
     }
 }

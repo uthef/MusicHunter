@@ -1,8 +1,9 @@
 ﻿using System.Text.RegularExpressions;
+using Uthef.MusicResolver.Filters;
 
 namespace Uthef.MusicResolver
 {
-    public class RegexFilter : IMusicResolverFilter
+    public sealed class RegexFilter : IMusicResolverFilter
     {
         public int Limit { get; } = 0;
 

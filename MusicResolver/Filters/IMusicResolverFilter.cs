@@ -1,4 +1,4 @@
-﻿namespace Uthef.MusicResolver
+﻿namespace Uthef.MusicResolver.Filters
 {
     public interface IMusicResolverFilter
     {

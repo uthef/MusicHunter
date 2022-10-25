@@ -63,7 +63,7 @@ namespace MusicResolverTests
             AssertSearchResultWithOutput(resultCollection, servicePack);
         }
 
-        [TestCase("russian circles - empros", ItemType.Album)]
+        [TestCase("five crumbs", ItemType.Album)]
         public async Task TestBandcamp(string query, ItemType type)
         {
             var servicePack = MusicService.Bandcamp;
