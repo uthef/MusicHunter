@@ -1,4 +1,4 @@
-# MusicResolver
+# MusicHunter
 
 ### Supported services
 - Yandex Music API
@@ -13,8 +13,8 @@
 ### Known limitations
 - Amazon can return up to 16 results (1 page)
 - Bandcamp can return up to 50 results
-- ```MusicResolver.DefaultArtworkResolution``` property only applies to Yandex Music, Deezer & Apple Music
-- ```MusicResolverConfiguration.UseSoundCloudProxy``` property is used for testing purposes and not meant for production
+- ```MusicHunter.DefaultArtworkResolution``` property only applies to Yandex Music, Deezer & Apple Music
+- ```MusicHunterConfiguration.UseSoundCloudProxy``` property is used for testing purposes and not meant for production
 
 ### Examples
-- See MusicResolverTests project
+- See MusicHunterTests project
