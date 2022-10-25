@@ -4,7 +4,7 @@
     {   
         public string Id { get; }
         public string Url { get; }
-        public string Title { get; }
+        public string Title { get; internal set; }
         public List<string> Artists { get; }
         public string? ArtworkUrl { get; }
         public bool HasArtwork { get => ArtworkUrl != null; }
@@ -60,8 +60,5 @@
 
         public bool CompareTitle(string title) =>
             Title.ToLower().Trim() == title?.ToLower().Trim();
-
-        public bool TitleStartsWith(string value) =>
-            Title.ToLower().Trim().StartsWith(value.ToLower().Trim());
     }
 }

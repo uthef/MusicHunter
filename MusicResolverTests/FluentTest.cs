@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Unicode;
 using Uthef.MusicResolver;
+using Uthef.MusicResolver.Filters;
 
 namespace MusicResolverTests
 {
@@ -43,6 +44,15 @@ namespace MusicResolverTests
 
             var resultCollection = await MusicResolver.SearchAsync(query, type, ServicePack.All, filter);
             AssertSearchResultWithOutput(resultCollection, ServicePack.All);
+        }
+
+        [TestCase("pirate wicked", ItemType.Track, "coeur de pirate", "wicked games")]
+        public async Task TestYoutubeAndSoundCloudStrictly(string query, ItemType itemType, string strictArtist, string strictTitle)
+        {
+            var filter = new StrictFilter(strictArtist, strictTitle);
+            var servicePack = new ServicePack(MusicService.YouTube, MusicService.SoundCloud);
+            var resultCollection = await MusicResolver.SearchAsync(query, itemType, servicePack, filter);
+            AssertSearchResultWithOutput(resultCollection, servicePack);
         }
 
         [TestCase("ic3peak - грустная сука", ItemType.Track)]
