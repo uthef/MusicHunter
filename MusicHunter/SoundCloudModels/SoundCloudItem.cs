@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Uthef.MusicResolver.SoundCloudModels
+namespace Uthef.MusicHunter.SoundCloudModels
 {
     internal class SoundCloudItem
     {

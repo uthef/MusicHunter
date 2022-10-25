@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using Uthef.MusicResolver;
+using Uthef.MusicHunter;
 
-namespace Uthef.MusicResolver.BandcampModels
+namespace Uthef.MusicHunter.BandcampModels
 {
     public class BandcampSearchRequest
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace Uthef.MusicResolver
+namespace Uthef.MusicHunter
 {
     public class ServicePack
     {

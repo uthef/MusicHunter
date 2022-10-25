@@ -1,14 +1,14 @@
 ﻿using System.Text.RegularExpressions;
-using Uthef.MusicResolver.Filters;
+using Uthef.MusicHunter.Filters;
 
-namespace Uthef.MusicResolver
+namespace Uthef.MusicHunter
 {
-    public sealed class RegexFilter : IMusicResolverFilter
+    public sealed class RegexFilter : IMusicHunterFilter
     {
         public int Limit { get; } = 0;
 
         public readonly Regex? Artist, Title;
-        public RegexFilter(Regex? artist, Regex? title, int limit = MusicResolver.DefaultLimit)
+        public RegexFilter(Regex? artist, Regex? title, int limit = MusicHunter.DefaultLimit)
         {
             Artist = artist;
             Title = title;

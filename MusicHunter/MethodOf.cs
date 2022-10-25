@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Uthef.MusicResolver
+namespace Uthef.MusicHunter
 {
     [AttributeUsage(AttributeTargets.Method)]
     internal class MethodOf : Attribute

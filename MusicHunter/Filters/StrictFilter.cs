@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Uthef.MusicResolver.Filters
+namespace Uthef.MusicHunter.Filters
 {
-    public sealed class StrictFilter : IMusicResolverFilter
+    public sealed class StrictFilter : IMusicHunterFilter
     {
         public string? Artist { get; }
         public string? Title { get; }
@@ -10,7 +10,7 @@ namespace Uthef.MusicResolver.Filters
 
         public bool ExtractArtistNameFromTitle = true;
 
-        public StrictFilter(string? artist, string? title, int limit = MusicResolver.DefaultLimit)
+        public StrictFilter(string? artist, string? title, int limit = MusicHunter.DefaultLimit)
         {
             Artist = artist;
             Title = title;

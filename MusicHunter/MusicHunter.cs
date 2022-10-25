@@ -10,17 +10,16 @@ using E.Deezer.Api;
 using SpotifyAPI.Web;
 using YoutubeExplode;
 using YoutubeExplode.Common;
-using Uthef.MusicResolver.SoundCloudModels;
-using Uthef.MusicResolver.BandcampModels;
+using Uthef.MusicHunter.SoundCloudModels;
+using Uthef.MusicHunter.BandcampModels;
 using System.Collections.Immutable;
 using HtmlAgilityPack;
 using System.Net;
-using Uthef.MusicResolver.Filters;
-using YoutubeExplode.Videos;
+using Uthef.MusicHunter.Filters;
 
-namespace Uthef.MusicResolver
+namespace Uthef.MusicHunter
 {
-    public sealed class MusicResolver : IDisposable
+    public sealed class MusicHunter : IDisposable
     {
         public const string BandcampApiUrlPart = "https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elastic";
         public const string YouTubeUrlPart = "https://music.youtube.com";
@@ -40,11 +39,11 @@ namespace Uthef.MusicResolver
         private readonly SpotifyClient? _spotifyClient;
 
         private readonly Dictionary<MusicService, SearchMethod> _methods = new();
-        private readonly MusicResolverConfiguration _configuration;
+        private readonly MusicHunterConfiguration _configuration;
         private readonly Regex _artworkResolutionPattern = new("((%%|(\\d+x\\d+)))(?!.*(%%|(\\d+x\\d+)))", RegexOptions.Compiled);
         private readonly Regex _amazonQueryRegex = new("(?<=trackAsin=).+?(?=&)", RegexOptions.Compiled);
 
-        public MusicResolver(MusicResolverConfiguration config)
+        public MusicHunter(MusicHunterConfiguration config)
         {
             _configuration = config;
 
@@ -87,11 +86,11 @@ namespace Uthef.MusicResolver
         }
 
         public async Task<SearchResult> SearchAsync(string query, ItemType itemType, 
-            ServicePack pack, IMusicResolverFilter? filter = null)
+            ServicePack pack, IMusicHunterFilter? filter = null, CancellationToken cancellationToken = default)
         {
             List<SearchItem> searchItems = new();
             List<ExceptionView> exceptions = new();
-            List<Task<SearchItemList>> tasks = new();
+            List<Task> tasks = new();
 
             foreach (var service in pack.Items)
             {
@@ -126,12 +125,13 @@ namespace Uthef.MusicResolver
 
             try
             {
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).WaitAsync(cancellationToken);
             }
-            catch 
-            { 
-
+            catch (TaskCanceledException ex)
+            {
+                throw ex;
             }
+            catch { }
 
             return new SearchResult(itemType, searchItems.ToImmutableList(), exceptions.ToImmutableList(), DateTime.Now - overallStamp);
         }

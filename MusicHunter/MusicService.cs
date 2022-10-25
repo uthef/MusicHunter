@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace Uthef.MusicResolver
+namespace Uthef.MusicHunter
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum MusicService

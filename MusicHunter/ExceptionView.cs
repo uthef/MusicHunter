@@ -1,4 +1,4 @@
-﻿namespace Uthef.MusicResolver
+﻿namespace Uthef.MusicHunter
 {
     public class ExceptionView
     {
