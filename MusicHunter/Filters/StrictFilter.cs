@@ -2,7 +2,7 @@
 
 namespace Uthef.MusicHunter.Filters
 {
-    public sealed class StrictFilter : IMusicHunterFilter
+    public sealed class StrictFilter : ISearchFilter
     {
         public string? Artist { get; }
         public string? Title { get; }
@@ -10,7 +10,7 @@ namespace Uthef.MusicHunter.Filters
 
         public bool ExtractArtistNameFromTitle = true;
 
-        public StrictFilter(string? artist, string? title, int limit = MusicHunter.DefaultLimit)
+        public StrictFilter(string? artist, string? title, int limit = SearchClient.DefaultLimit)
         {
             Artist = artist;
             Title = title;

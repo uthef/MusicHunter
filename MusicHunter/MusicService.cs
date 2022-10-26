@@ -6,6 +6,13 @@ namespace Uthef.MusicHunter
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum MusicService
     {
-        YouTube, Bandcamp, Deezer, AppleMusic, Spotify, Yandex, SoundCloud, Amazon
+        YouTube, 
+        Bandcamp, 
+        Deezer,
+        AppleMusic,
+        Spotify, 
+        Yandex, 
+        SoundCloud, 
+        Amazon
     }
 }

@@ -3,12 +3,12 @@ using Uthef.MusicHunter.Filters;
 
 namespace Uthef.MusicHunter
 {
-    public sealed class RegexFilter : IMusicHunterFilter
+    public sealed class RegexFilter : ISearchFilter
     {
         public int Limit { get; } = 0;
 
         public readonly Regex? Artist, Title;
-        public RegexFilter(Regex? artist, Regex? title, int limit = MusicHunter.DefaultLimit)
+        public RegexFilter(Regex? artist, Regex? title, int limit = SearchClient.DefaultLimit)
         {
             Artist = artist;
             Title = title;

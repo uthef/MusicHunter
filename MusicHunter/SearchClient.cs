@@ -19,7 +19,7 @@ using Uthef.MusicHunter.Filters;
 
 namespace Uthef.MusicHunter
 {
-    public sealed class MusicHunter : IDisposable
+    public sealed class SearchClient : IDisposable
     {
         public const string BandcampApiUrlPart = "https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elastic";
         public const string YouTubeUrlPart = "https://music.youtube.com";
@@ -39,11 +39,11 @@ namespace Uthef.MusicHunter
         private readonly SpotifyClient? _spotifyClient;
 
         private readonly Dictionary<MusicService, SearchMethod> _methods = new();
-        private readonly MusicHunterConfiguration _configuration;
+        private readonly SearchClientConfiguration _configuration;
         private readonly Regex _artworkResolutionPattern = new("((%%|(\\d+x\\d+)))(?!.*(%%|(\\d+x\\d+)))", RegexOptions.Compiled);
         private readonly Regex _amazonQueryRegex = new("(?<=trackAsin=).+?(?=&)", RegexOptions.Compiled);
 
-        public MusicHunter(MusicHunterConfiguration config)
+        public SearchClient(SearchClientConfiguration config)
         {
             _configuration = config;
 
@@ -86,7 +86,7 @@ namespace Uthef.MusicHunter
         }
 
         public async Task<SearchResult> SearchAsync(string query, ItemType itemType, 
-            ServicePack pack, IMusicHunterFilter? filter = null, CancellationToken cancellationToken = default)
+            ServicePack pack, ISearchFilter? filter = null, CancellationToken cancellationToken = default)
         {
             List<SearchItem> searchItems = new();
             List<ExceptionView> exceptions = new();
