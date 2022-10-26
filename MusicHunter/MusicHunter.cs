@@ -94,7 +94,7 @@ namespace Uthef.MusicHunter
 
             foreach (var service in pack.Items)
             {
-                var task = _methods[service].Invoke(query, itemType, filter?.Limit ?? DefaultLimit);
+                var task = _methods[service].Invoke(query, itemType, filter?.Limit ?? DefaultLimit, cancellationToken);
                 var stamp = DateTime.Now;
 
                 task.GetAwaiter().OnCompleted(() =>
@@ -112,7 +112,7 @@ namespace Uthef.MusicHunter
                         if (filter != null && !filter.IsItemValid(result, itemType))
                             continue;
 
-                        result.ExecutionTime = DateTime.Now - stamp;
+                        result.ExecutionTimeMs = (DateTime.Now - stamp).TotalMilliseconds;
                         searchItems.Add(result);
                         break;
                     }
@@ -138,12 +138,12 @@ namespace Uthef.MusicHunter
 
         #region Yandex
         [MethodOf(MusicService.Yandex)]
-        public async Task<SearchItemList> SearchYandexAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        public async Task<SearchItemList> SearchYandexAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             var searchResultCollection = new SearchItemList(itemType);
 
             var type = itemType is ItemType.Track ? YandexSearchType.Track : YandexSearchType.Album;
-            var result = await _yandexMusicResolver.SearchResultLoader.LoadSearchResult(type, query, limit);
+            var result = await _yandexMusicResolver.SearchResultLoader.LoadSearchResult(type, query, limit).WaitAsync(cancellationToken);
 
             if (result == null) return searchResultCollection;
 
@@ -188,13 +188,13 @@ namespace Uthef.MusicHunter
 
         #region Deezer
         [MethodOf(MusicService.Deezer)]
-        public async Task<SearchItemList> SearchDeezerAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        public async Task<SearchItemList> SearchDeezerAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             var searchResultCollection = new SearchItemList(itemType);
 
             if (itemType is ItemType.Track)
             {
-                var tracks = await _deezerResolver.Search.Tracks(query, 0, (uint)limit);
+                var tracks = await _deezerResolver.Search.Tracks(query, 0, (uint)limit).WaitAsync(cancellationToken);
 
                 foreach (var track in tracks)
                 {
@@ -245,13 +245,13 @@ namespace Uthef.MusicHunter
 
         #region AppleMusic
         [MethodOf(MusicService.AppleMusic)]
-        public async Task<SearchItemList> SearchAppleMusicAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        public async Task<SearchItemList> SearchAppleMusicAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             var searchResultCollection = new SearchItemList(itemType);
 
             if (itemType is ItemType.Track)
             {
-                var searchResult = await _iTunesSearchManager.GetSongsAsync(query, limit);
+                var searchResult = await _iTunesSearchManager.GetSongsAsync(query, limit).WaitAsync(cancellationToken);
 
                 foreach (var song in searchResult.Songs)
                 {
@@ -293,13 +293,13 @@ namespace Uthef.MusicHunter
 
         #region YouTube
         [MethodOf(MusicService.YouTube)]
-        public async Task<SearchItemList> SearchYouTubeAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        public async Task<SearchItemList> SearchYouTubeAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             var searchResultCollection = new SearchItemList(itemType);
 
             if (itemType is ItemType.Track)
             {
-                var videos = await _ytClient.Search.GetVideosAsync(query).CollectAsync(limit);
+                var videos = await _ytClient.Search.GetVideosAsync(query, cancellationToken).CollectAsync(limit);
 
                 foreach (var video in videos)
                 {
@@ -317,7 +317,7 @@ namespace Uthef.MusicHunter
             }
             else
             {
-                var playlists = await _ytClient.Search.GetPlaylistsAsync(query).CollectAsync(limit);
+                var playlists = await _ytClient.Search.GetPlaylistsAsync(query, cancellationToken).CollectAsync(limit);
 
                 foreach (var playlist in playlists)
                 {
@@ -342,7 +342,7 @@ namespace Uthef.MusicHunter
 
         #region Bandcamp
         [MethodOf(MusicService.Bandcamp)]
-        public async Task<SearchItemList> SearchBandcampAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        public async Task<SearchItemList> SearchBandcampAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             var requestUrl = BandcampApiUrlPart;
             var searchResultCollection = new SearchItemList(itemType);
@@ -350,7 +350,7 @@ namespace Uthef.MusicHunter
             using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
             request.Content = JsonContent.Create(new BandcampSearchRequest(query, itemType, 0, false));
 
-            using var response = await _httpClient.SendAsync(request);
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<BandcampSearchResult>();
@@ -379,7 +379,7 @@ namespace Uthef.MusicHunter
 
         #region Spotify
         [MethodOf(MusicService.Spotify)]
-        public async Task<SearchItemList> SearchSpotifyAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        public async Task<SearchItemList> SearchSpotifyAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             if (_spotifyClient == null) throw new Exception("Spotify credentials are not provided");
 
@@ -391,7 +391,7 @@ namespace Uthef.MusicHunter
                 Limit = limit
             };
 
-            var response = await _spotifyClient.Search.Item(searchRequest);
+            var response = await _spotifyClient.Search.Item(searchRequest).WaitAsync(cancellationToken);
 
             if (itemType is ItemType.Track && response.Tracks.Items != null)
             {
@@ -432,7 +432,7 @@ namespace Uthef.MusicHunter
 
         #region SoundCloud
         [MethodOf(MusicService.SoundCloud)]
-        public async Task<SearchItemList> SearchSoundCloudAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        public async Task<SearchItemList> SearchSoundCloudAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             if (_configuration.SoundCloudClientId == null)
             {
@@ -451,7 +451,7 @@ namespace Uthef.MusicHunter
             var searchResultCollection = new SearchItemList(itemType);
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-            using var response = await _httpClient.SendAsync(request);
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             if (response.Content.Headers.ContentType?.MediaType == MediaTypeNames.Application.Json)
@@ -482,7 +482,7 @@ namespace Uthef.MusicHunter
 
         #region Amazon
         [MethodOf(MusicService.Amazon)]
-        public async Task<SearchItemList> SearchAmazonAsync(string query, ItemType itemType, int limit = DefaultLimit)
+        public async Task<SearchItemList> SearchAmazonAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             var list = new SearchItemList(itemType);
             var type = itemType is ItemType.Track ? "track" : "album";
@@ -490,7 +490,7 @@ namespace Uthef.MusicHunter
             using var request = new HttpRequestMessage(HttpMethod.Get, $"https://amazon.com/s?k={query}&i=digital-music-{type}&dc");
             request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0");
             
-            var response = await _httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var document = new HtmlDocument();

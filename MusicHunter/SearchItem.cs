@@ -8,7 +8,7 @@
         public List<string> Artists { get; }
         public string? ArtworkUrl { get; }
         public MusicService Service { get; }
-        public TimeSpan ExecutionTime { get; internal set; }
+        public double ExecutionTimeMs { get; internal set; }
 
         public SearchItem(string id, string url, string title, string artist, MusicService service)
         {

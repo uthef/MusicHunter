@@ -10,10 +10,10 @@ namespace Uthef.MusicHunter
             Type = type;
             Items = items;
             Exceptions = exceptions;
-            OverallExecutionTime = overallExecutionTime;
+            OverallExecutionTimeMs = overallExecutionTime.TotalMilliseconds;
         }
 
-        public TimeSpan OverallExecutionTime { get; }
+        public double OverallExecutionTimeMs { get; }
 
         public ImmutableList<SearchItem> Items { get; }
         public ImmutableList<ExceptionView> Exceptions { get; }

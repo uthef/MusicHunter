@@ -7,15 +7,16 @@ using Uthef.MusicHunter.Filters;
 namespace MusicHunterTests
 {
     [TestFixture]
-    public class FluentTest
+    [Timeout(5000)]
+    public class SearchTest
     {
-        MusicHunter MainHunter;
+        MusicHunter _musicHunter;
         JsonSerializerOptions JsonSerializerOptions;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            MainHunter = new MusicHunter(
+            _musicHunter = new MusicHunter(
                 new MusicHunterConfiguration(
                     spotifyClientId: "c65a78a3e14048edaecd6858adf234cc",
                     spotifyClientSecret: "3aed4954a11a4214ac2b3f4fff435d2a",
@@ -33,7 +34,7 @@ namespace MusicHunterTests
         [TestCase("celldweller - my disintegration", ItemType.Track)]
         public async Task TestAll(string query, ItemType type)
         {
-            var resultCollection = await MainHunter.SearchAsync(query, type, ServicePack.All);
+            var resultCollection = await _musicHunter.SearchAsync(query, type, ServicePack.All);
             AssertSearchResultWithOutput(resultCollection, ServicePack.All);
         }
 
@@ -42,16 +43,16 @@ namespace MusicHunterTests
         {
             var filter = new StrictFilter(strictArtist, strictTitle);
 
-            var resultCollection = await MainHunter.SearchAsync(query, type, ServicePack.All, filter);
+            var resultCollection = await _musicHunter.SearchAsync(query, type, ServicePack.All, filter);
             AssertSearchResultWithOutput(resultCollection, ServicePack.All);
         }
 
         [TestCase("pirate wicked", ItemType.Track, "coeur de pirate", "wicked games")]
-        public async Task TestYoutubeAndSoundCloudStrictly(string query, ItemType itemType, string strictArtist, string strictTitle)
+        public async Task TestYouTubeAndSoundCloudStrictly(string query, ItemType itemType, string strictArtist, string strictTitle)
         {
             var filter = new StrictFilter(strictArtist, strictTitle);
             var servicePack = new ServicePack(MusicService.YouTube, MusicService.SoundCloud);
-            var resultCollection = await MainHunter.SearchAsync(query, itemType, servicePack, filter);
+            var resultCollection = await _musicHunter.SearchAsync(query, itemType, servicePack, filter);
             AssertSearchResultWithOutput(resultCollection, servicePack);
         }
 
@@ -59,7 +60,7 @@ namespace MusicHunterTests
         public async Task TestSoundCloud(string query, ItemType type)
         {
             var servicePack = MusicService.SoundCloud;
-            var resultCollection = await MainHunter.SearchAsync(query, type, servicePack);
+            var resultCollection = await _musicHunter.SearchAsync(query, type, servicePack);
             AssertSearchResultWithOutput(resultCollection, servicePack);
         }
 
@@ -67,7 +68,7 @@ namespace MusicHunterTests
         public async Task TestBandcamp(string query, ItemType type)
         {
             var servicePack = MusicService.Bandcamp;
-            var resultCollection = await MainHunter.SearchAsync(query, type, servicePack);
+            var resultCollection = await _musicHunter.SearchAsync(query, type, servicePack);
             AssertSearchResultWithOutput(resultCollection, servicePack);
         }
 
@@ -75,7 +76,7 @@ namespace MusicHunterTests
         [TestCase("machine head - circle the drain", ItemType.Track)]
         public async Task TestAmazon(string query, ItemType itemType)
         {
-            var result = await MainHunter.SearchAsync(query, itemType, MusicService.Amazon);
+            var result = await _musicHunter.SearchAsync(query, itemType, MusicService.Amazon);
             AssertSearchResultWithOutput(result, MusicService.Amazon);
         }
 
