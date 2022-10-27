@@ -18,3 +18,6 @@
 
 ### Examples
 - See MusicHunterTests project
+
+### Spotify credentials
+- https://gist.github.com/uthef/96e41017b4bc723b7056be7a29573a58
