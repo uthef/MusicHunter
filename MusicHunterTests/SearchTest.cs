@@ -21,16 +21,13 @@ namespace MusicHunterTests
             using var fs = new FileStream("Config.json", FileMode.Open);
             var config = JsonSerializer.Deserialize<JsonObject>(fs);
 
-
-            var dateTime = DateTime.Now;
             _searchClient = new SearchClient(
                 new SearchClientConfiguration(
                     spotifyClientId: config?["SpotifyClientID"]?.ToString(),
                     spotifyClientSecret: config?["SpotifyClientSecret"]?.ToString(),
-                    useSoundCloudProxy: true
+                    useSoundCloudProxy: false
                 )
             );
-            var time = DateTime.Now - dateTime;
 
             JsonSerializerOptions = new JsonSerializerOptions
             {
