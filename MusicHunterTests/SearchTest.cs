@@ -25,7 +25,7 @@ namespace MusicHunterTests
                 new SearchClientConfiguration(
                     spotifyClientId: config?["SpotifyClientID"]?.ToString(),
                     spotifyClientSecret: config?["SpotifyClientSecret"]?.ToString(),
-                    useSoundCloudProxy: false
+                    useSoundCloudProxy: true
                 )
             );
 
