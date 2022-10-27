@@ -1,5 +1,6 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Unicode;
 using Uthef.MusicHunter;
 using Uthef.MusicHunter.Filters;
@@ -16,13 +17,20 @@ namespace MusicHunterTests
         [OneTimeSetUp]
         public void Setup()
         {
+            // Read configuration file
+            using var fs = new FileStream("Config.json", FileMode.Open);
+            var config = JsonSerializer.Deserialize<JsonObject>(fs);
+
+
+            var dateTime = DateTime.Now;
             _searchClient = new SearchClient(
                 new SearchClientConfiguration(
-                    spotifyClientId: "c65a78a3e14048edaecd6858adf234cc",
-                    spotifyClientSecret: "3aed4954a11a4214ac2b3f4fff435d2a",
+                    spotifyClientId: config?["SpotifyClientID"]?.ToString(),
+                    spotifyClientSecret: config?["SpotifyClientSecret"]?.ToString(),
                     useSoundCloudProxy: true
                 )
             );
+            var time = DateTime.Now - dateTime;
 
             JsonSerializerOptions = new JsonSerializerOptions
             {

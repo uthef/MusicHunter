@@ -49,7 +49,7 @@ namespace Uthef.MusicHunter
 
             var methods = GetType()
                 .GetMethods()
-                .Where(x => x.GetCustomAttribute<MethodOf>() != null 
+                .Where(x => x.GetCustomAttribute<MethodOf>() != null
                     && x.ReturnType == typeof(Task<SearchItemList>));
 
             foreach (var method in methods)
