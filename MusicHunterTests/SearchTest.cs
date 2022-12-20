@@ -77,8 +77,8 @@ namespace MusicHunterTests
             AssertSearchResultWithOutput(resultCollection, servicePack);
         }
 
-        [TestCase("david galloway - we wait so long to begin", ItemType.Album)]
-        [TestCase("machine head - circle the drain", ItemType.Track)]
+        [TestCase("baldocaster - moonrise", ItemType.Album)]
+        [TestCase("corey taylor xmas", ItemType.Track)]
         public async Task TestAmazon(string query, ItemType itemType)
         {
             var result = await _searchClient.SearchAsync(query, itemType, MusicService.Amazon);

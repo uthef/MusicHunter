@@ -41,7 +41,8 @@ namespace Uthef.MusicHunter
         private readonly Dictionary<MusicService, SearchMethod> _methods = new();
         private readonly SearchClientConfiguration _configuration;
         private readonly Regex _artworkResolutionPattern = new("((%%|(\\d+x\\d+)))(?!.*(%%|(\\d+x\\d+)))", RegexOptions.Compiled);
-        private readonly Regex _amazonQueryRegex = new("(?<=trackAsin=).+?(?=&)", RegexOptions.Compiled);
+        private readonly Regex _amazonRegex = new("\\/[^/]+$", RegexOptions.Compiled);
+        private readonly Regex _amazonIdRegex = new("(?<=trackAsin=)[^&;]+", RegexOptions.Compiled);
 
         public SearchClient(SearchClientConfiguration config)
         {
@@ -500,6 +501,8 @@ namespace Uthef.MusicHunter
 
             if (cards is null) return list;
 
+            var count = cards.Count;
+
             var lim = Math.Min(cards.Count, limit);
 
             for (int i = 0; i < lim; i++)
@@ -507,30 +510,31 @@ namespace Uthef.MusicHunter
                 var card = cards[i];
 
                 var rows = card.SelectNodes("//div[@class=\"a-row\"]");
+                if (rows is null) return list;
+
                 var links = card.SelectNodes("//a[contains(@class, \"a-link-normal\") and contains(@class, \"s-underline-text\")]");
                 var imageUrl = card.SelectSingleNode("//img[@class=\"s-image\"]").Attributes["src"].Value;
 
                 var title = links.First().InnerText.Trim();
                 var artist = rows.First().ChildNodes.Last().InnerText;
 
-                var queryPart = links[2].Attributes["href"].Value.Split("/").Last();
-                var uri = new Uri($"https://music.amazon.com/albums/{queryPart}");
-                var url = uri.GetLeftPart(UriPartial.Path);
+                var urlPart = links[2].Attributes["href"].Value;
+                var filteredUrlPart = _amazonRegex.Replace(urlPart, "");
+                var link = $"https://www.amazon.com{filteredUrlPart}";
                 string id = "";
 
                 if (itemType is ItemType.Track)
                 {
-                    id = _amazonQueryRegex.Match(uri.Query).Value;
-                    url += $"?trackAsin={id}";
+                    id = _amazonIdRegex.Match(urlPart).Value;
+                    link += $"?trackAsin={id}";
                 }
                 else
                 {
-                    var qMarkIndex = queryPart.IndexOf("?");
-                    id = queryPart.Remove(qMarkIndex, queryPart.Length - qMarkIndex);
+                    id = filteredUrlPart.Replace("/dp/", "");
                 }
 
 
-                list.Add(new SearchItem(id, url, title, artist, imageUrl, MusicService.Amazon));
+                list.Add(new SearchItem(id, link, title, artist, imageUrl, MusicService.Amazon));
             }
 
             return list;

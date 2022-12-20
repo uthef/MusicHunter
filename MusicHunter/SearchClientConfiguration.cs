@@ -11,7 +11,7 @@
         public SearchClientConfiguration(
             string? spotifyClientId = null, 
             string? spotifyClientSecret = null, 
-            string? soundCloudClientId = "jOJjarVXJfZlI309Up55k93EUDG7ILW6",
+            string? soundCloudClientId = "0K8gqs6E9DAVUafZxVq6xIIVVjtIgXTv",
             bool useSoundCloudProxy = false)
         {
             SpotifyClientId = spotifyClientId;
