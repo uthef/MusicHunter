@@ -78,7 +78,7 @@ namespace MusicHunterTests
         }
 
         [TestCase("baldocaster - moonrise", ItemType.Album)]
-        [TestCase("corey taylor xmas", ItemType.Track)]
+        [TestCase("katy perry i kissed a girl", ItemType.Track)]
         public async Task TestAmazon(string query, ItemType itemType)
         {
             var result = await _searchClient.SearchAsync(query, itemType, MusicService.Amazon);

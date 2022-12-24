@@ -16,6 +16,7 @@ using System.Collections.Immutable;
 using HtmlAgilityPack;
 using System.Net;
 using Uthef.MusicHunter.Filters;
+using System.Text.Json;
 
 namespace Uthef.MusicHunter
 {
@@ -42,7 +43,7 @@ namespace Uthef.MusicHunter
         private readonly SearchClientConfiguration _configuration;
         private readonly Regex _artworkResolutionPattern = new("((%%|(\\d+x\\d+)))(?!.*(%%|(\\d+x\\d+)))", RegexOptions.Compiled);
         private readonly Regex _amazonRegex = new("\\/[^/]+$", RegexOptions.Compiled);
-        private readonly Regex _amazonIdRegex = new("(?<=trackAsin=)[^&;]+", RegexOptions.Compiled);
+        private readonly Regex _amazonIdRegex = new("(?<=trackAsin=)[^&;#]+", RegexOptions.Compiled);
 
         public SearchClient(SearchClientConfiguration config)
         {
@@ -310,7 +311,7 @@ namespace Uthef.MusicHunter
                             $"{YouTubeUrlPart}/watch?v={video.Id}",
                             video.Title,
                             video.Author.ChannelTitle,
-                            video.Thumbnails.LastOrDefault()?.Url,
+                            video.Thumbnails[0]?.Url,
                             MusicService.YouTube
                         )
                     );
@@ -330,7 +331,7 @@ namespace Uthef.MusicHunter
                             $"{YouTubeUrlPart}/playlist?list={playlist.Id}",
                             playlist.Title,
                             author is null ? "" : author.ChannelTitle,
-                            playlist.Thumbnails.LastOrDefault()?.Url,
+                            playlist.Thumbnails[0]?.Url,
                             MusicService.YouTube
                         )
                     );
@@ -354,7 +355,7 @@ namespace Uthef.MusicHunter
             using var response = await _httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<BandcampSearchResult>();
+            var result = await response.Content.ReadFromJsonAsync<BandcampSearchResult>(cancellationToken: cancellationToken);
             if (result == null) return searchResultCollection;
 
             var realLimit = Math.Min(result.Data.Items.Count, limit);
@@ -457,7 +458,7 @@ namespace Uthef.MusicHunter
 
             if (response.Content.Headers.ContentType?.MediaType == MediaTypeNames.Application.Json)
             {
-                var result = await response.Content.ReadFromJsonAsync<SoundCloudSearchResult>();
+                var result = await response.Content.ReadFromJsonAsync<SoundCloudSearchResult>(cancellationToken: cancellationToken);
 
                 if (result is null) return searchResultCollection;
 
@@ -495,7 +496,7 @@ namespace Uthef.MusicHunter
             response.EnsureSuccessStatusCode();
 
             var document = new HtmlDocument();
-            document.Load(await response.Content.ReadAsStreamAsync());
+            document.Load(await response.Content.ReadAsStreamAsync(cancellationToken));
 
             var cards = document.DocumentNode.SelectNodes("//div[contains(@class, \"s-card-container\")]");
 
@@ -515,7 +516,7 @@ namespace Uthef.MusicHunter
                 var links = card.SelectNodes("//a[contains(@class, \"a-link-normal\") and contains(@class, \"s-underline-text\")]");
                 var imageUrl = card.SelectSingleNode("//img[@class=\"s-image\"]").Attributes["src"].Value;
 
-                var title = links.First().InnerText.Trim();
+                var title = links[1].InnerText.Trim();
                 var artist = rows.First().ChildNodes.Last().InnerText;
 
                 var urlPart = links[2].Attributes["href"].Value;
