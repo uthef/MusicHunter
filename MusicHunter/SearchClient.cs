@@ -42,8 +42,8 @@ namespace Uthef.MusicHunter
         private readonly Dictionary<MusicService, SearchMethod> _methods = new();
         private readonly SearchClientConfiguration _configuration;
         private readonly Regex _artworkResolutionPattern = new("((%%|(\\d+x\\d+)))(?!.*(%%|(\\d+x\\d+)))", RegexOptions.Compiled);
-        //private readonly Regex _amazonRegex = new("\\/[^/]+$", RegexOptions.Compiled);
-        //private readonly Regex _amazonIdRegex = new("(?<=trackAsin=)[^&;#]+", RegexOptions.Compiled);
+        private readonly Regex _amazonTrackRegex = new(@"(?<=\?trackAsin=)\w+", RegexOptions.Compiled);
+        private readonly Regex _amazonAlbumRegex = new(@"(?<=/albums/)\w+", RegexOptions.Compiled);
 
         public SearchClient(SearchClientConfiguration config)
         {
@@ -556,6 +556,7 @@ namespace Uthef.MusicHunter
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
             var model = await response.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cancellationToken);
+            File.WriteAllText("log.json", await response.Content.ReadAsStringAsync());
             if (model?["methods"]?[0]?["template"]?["widgets"] is not JsonArray widgets) return list;
 
             var widget = widgets.Where(x => x?["header"]?.ToString() == (itemType is ItemType.Track ? "Songs" : "Albums")).First();
@@ -565,12 +566,13 @@ namespace Uthef.MusicHunter
 
             foreach (var item in items)
             {
+                var url = item?["primaryLink"]?["deeplink"]?.ToString();
+                var id = itemType is ItemType.Track ? _amazonTrackRegex.Match(url).Value : _amazonAlbumRegex.Match(url).Value;
                 var title = item?["secondaryText"]?.ToString();
                 var name = item?["primaryText"]?["text"]?.ToString();
-                var url = item?["primaryLink"]?["deeplink"]?.ToString();
                 var image = item?["image"]?.ToString();
 
-                list.Add(new SearchItem("id", $"https://music.amazon.com{url ?? ""}", name ?? "", title ?? "", image, MusicService.Amazon));
+                list.Add(new SearchItem(id, $"https://music.amazon.com{url ?? ""}", name ?? "", title ?? "", image, MusicService.Amazon));
             }
 
             return list;
