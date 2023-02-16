@@ -8,7 +8,7 @@
 - Spotify API (requires client ID and client secret)
 - SoundCloud (partial support, web API)
 - Bandcamp (partial support, web API)
-- Amazon Music (partial support via parsing HTML page)
+- Amazon Music (partial support, web API)
 
 ### Known limitations
 - Amazon can return up to 16 results (1 page)
