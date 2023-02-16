@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <PackageReference Include="E.Deezer" Version="4.2.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
 	  <PackageReference Include="iTunesSearch" Version="1.0.44">
 		  <NoWarn>NU1701</NoWarn>
 	  </PackageReference>

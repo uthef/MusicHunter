@@ -25,9 +25,10 @@ namespace MusicHunterTests
                 new SearchClientConfiguration(
                     spotifyClientId: config?["SpotifyClientID"]?.ToString(),
                     spotifyClientSecret: config?["SpotifyClientSecret"]?.ToString(),
+                    soundCloudClientId: config?["SoundCloudClientId"]?.ToString(),
                     useSoundCloudProxy: true
                 )
-            );
+            ) ;
 
             JsonSerializerOptions = new JsonSerializerOptions
             {

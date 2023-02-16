@@ -14,7 +14,7 @@ namespace Uthef.MusicHunter
         public SearchClientConfiguration(
             string? spotifyClientId = null, 
             string? spotifyClientSecret = null, 
-            string? soundCloudClientId = "0K8gqs6E9DAVUafZxVq6xIIVVjtIgXTv",
+            string? soundCloudClientId = null,
             bool useSoundCloudProxy = false)
         {
             SpotifyClientId = spotifyClientId;

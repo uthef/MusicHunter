@@ -13,10 +13,10 @@ using YoutubeExplode.Common;
 using Uthef.MusicHunter.SoundCloudModels;
 using Uthef.MusicHunter.BandcampModels;
 using System.Collections.Immutable;
-using HtmlAgilityPack;
 using System.Net;
 using Uthef.MusicHunter.Filters;
-using System.Text.Json;
+using Uthef.MusicHunter.AmazonModels;
+using System.Text.Json.Nodes;
 
 namespace Uthef.MusicHunter
 {
@@ -42,8 +42,8 @@ namespace Uthef.MusicHunter
         private readonly Dictionary<MusicService, SearchMethod> _methods = new();
         private readonly SearchClientConfiguration _configuration;
         private readonly Regex _artworkResolutionPattern = new("((%%|(\\d+x\\d+)))(?!.*(%%|(\\d+x\\d+)))", RegexOptions.Compiled);
-        private readonly Regex _amazonRegex = new("\\/[^/]+$", RegexOptions.Compiled);
-        private readonly Regex _amazonIdRegex = new("(?<=trackAsin=)[^&;#]+", RegexOptions.Compiled);
+        //private readonly Regex _amazonRegex = new("\\/[^/]+$", RegexOptions.Compiled);
+        //private readonly Regex _amazonIdRegex = new("(?<=trackAsin=)[^&;#]+", RegexOptions.Compiled);
 
         public SearchClient(SearchClientConfiguration config)
         {
@@ -482,6 +482,66 @@ namespace Uthef.MusicHunter
         }
         #endregion
 
+        //#region Amazon
+        //[MethodOf(MusicService.Amazon)]
+        //public async Task<SearchItemList> SearchAmazonAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
+        //{
+        //    var list = new SearchItemList(itemType);
+        //    var type = itemType is ItemType.Track ? "track" : "album";
+
+        //    using var request = new HttpRequestMessage(HttpMethod.Get, $"https://amazon.com/s?k={query}&i=digital-music-{type}&dc");
+        //    request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0");
+
+        //    var response = await _httpClient.SendAsync(request, cancellationToken);
+        //    response.EnsureSuccessStatusCode();
+
+        //    var document = new HtmlDocument();
+        //    document.Load(await response.Content.ReadAsStreamAsync(cancellationToken));
+
+        //    var cards = document.DocumentNode.SelectNodes("//div[contains(@class, \"s-card-container\")]");
+
+        //    if (cards is null) return list;
+
+        //    var count = cards.Count;
+
+        //    var lim = Math.Min(cards.Count, limit);
+
+        //    for (int i = 0; i < lim; i++)
+        //    {
+        //        var card = cards[i];
+
+        //        var rows = card.SelectNodes("//div[@class=\"a-row\"]");
+        //        if (rows is null) return list;
+
+        //        var links = card.SelectNodes("//a[contains(@class, \"a-link-normal\") and contains(@class, \"s-underline-text\")]");
+        //        var imageUrl = card.SelectSingleNode("//img[@class=\"s-image\"]").Attributes["src"].Value;
+
+        //        var title = links[1].InnerText.Trim();
+        //        var artist = rows.First().ChildNodes.Last().InnerText;
+
+        //        var urlPart = links[2].Attributes["href"].Value;
+        //        var filteredUrlPart = _amazonRegex.Replace(urlPart, "");
+        //        var link = $"https://www.amazon.com{filteredUrlPart}";
+        //        string id = "";
+
+        //        if (itemType is ItemType.Track)
+        //        {
+        //            id = _amazonIdRegex.Match(urlPart).Value;
+        //            link += $"?trackAsin={id}";
+        //        }
+        //        else
+        //        {
+        //            id = filteredUrlPart.Replace("/dp/", "");
+        //        }
+
+
+        //        list.Add(new SearchItem(id, link, title, artist, imageUrl, MusicService.Amazon));
+        //    }
+
+        //    return list;
+        //}
+        //#endregion
+
         #region Amazon
         [MethodOf(MusicService.Amazon)]
         public async Task<SearchItemList> SearchAmazonAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
@@ -489,53 +549,28 @@ namespace Uthef.MusicHunter
             var list = new SearchItemList(itemType);
             var type = itemType is ItemType.Track ? "track" : "album";
 
-            using var request = new HttpRequestMessage(HttpMethod.Get, $"https://amazon.com/s?k={query}&i=digital-music-{type}&dc");
-            request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0");
-            
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://na.mesk.skill.music.a2z.com/api/showSearch");
+            request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0");
+            request.Content = new StringContent(new AmazonRequest(query).ToString());
+
             var response = await _httpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
 
-            var document = new HtmlDocument();
-            document.Load(await response.Content.ReadAsStreamAsync(cancellationToken));
+            var model = await response.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cancellationToken);
+            if (model?["methods"]?[0]?["template"]?["widgets"] is not JsonArray widgets) return list;
 
-            var cards = document.DocumentNode.SelectNodes("//div[contains(@class, \"s-card-container\")]");
+            var widget = widgets.Where(x => x?["header"]?.ToString() == (itemType is ItemType.Track ? "Songs" : "Albums")).First();
+            if (widget is null) return list;
 
-            if (cards is null) return list;
+            if (widget?["items"] is not JsonArray items) return list;
 
-            var count = cards.Count;
-
-            var lim = Math.Min(cards.Count, limit);
-
-            for (int i = 0; i < lim; i++)
+            foreach (var item in items)
             {
-                var card = cards[i];
+                var title = item?["secondaryText"]?.ToString();
+                var name = item?["primaryText"]?["text"]?.ToString();
+                var url = item?["primaryLink"]?["deeplink"]?.ToString();
+                var image = item?["image"]?.ToString();
 
-                var rows = card.SelectNodes("//div[@class=\"a-row\"]");
-                if (rows is null) return list;
-
-                var links = card.SelectNodes("//a[contains(@class, \"a-link-normal\") and contains(@class, \"s-underline-text\")]");
-                var imageUrl = card.SelectSingleNode("//img[@class=\"s-image\"]").Attributes["src"].Value;
-
-                var title = links[1].InnerText.Trim();
-                var artist = rows.First().ChildNodes.Last().InnerText;
-
-                var urlPart = links[2].Attributes["href"].Value;
-                var filteredUrlPart = _amazonRegex.Replace(urlPart, "");
-                var link = $"https://www.amazon.com{filteredUrlPart}";
-                string id = "";
-
-                if (itemType is ItemType.Track)
-                {
-                    id = _amazonIdRegex.Match(urlPart).Value;
-                    link += $"?trackAsin={id}";
-                }
-                else
-                {
-                    id = filteredUrlPart.Replace("/dp/", "");
-                }
-
-
-                list.Add(new SearchItem(id, link, title, artist, imageUrl, MusicService.Amazon));
+                list.Add(new SearchItem("id", $"https://music.amazon.com{url ?? ""}", name ?? "", title ?? "", image, MusicService.Amazon));
             }
 
             return list;
