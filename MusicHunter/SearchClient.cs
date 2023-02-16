@@ -556,7 +556,7 @@ namespace Uthef.MusicHunter
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
             var model = await response.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cancellationToken);
-            File.WriteAllText("log.json", await response.Content.ReadAsStringAsync());
+
             if (model?["methods"]?[0]?["template"]?["widgets"] is not JsonArray widgets) return list;
 
             var widget = widgets.Where(x => x?["header"]?.ToString() == (itemType is ItemType.Track ? "Songs" : "Albums")).First();
