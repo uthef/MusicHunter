@@ -547,13 +547,13 @@ namespace Uthef.MusicHunter
         public async Task<SearchItemList> SearchAmazonAsync(string query, ItemType itemType, int limit = DefaultLimit, CancellationToken cancellationToken = default)
         {
             var list = new SearchItemList(itemType);
-            var type = itemType is ItemType.Track ? "track" : "album";
 
             var request = new HttpRequestMessage(HttpMethod.Post, "https://na.mesk.skill.music.a2z.com/api/showSearch");
             request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0");
             request.Content = new StringContent(new AmazonRequest(query).ToString());
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
 
             var model = await response.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cancellationToken);
 
@@ -564,8 +564,12 @@ namespace Uthef.MusicHunter
 
             if (widget?["items"] is not JsonArray items) return list;
 
-            foreach (var item in items)
+            limit = Math.Min(items.Count, limit);
+
+            for (int i = 0; i < limit; i++)
             {
+                var item = items[i];
+
                 var url = item?["primaryLink"]?["deeplink"]?.ToString();
                 var id = itemType is ItemType.Track ? _amazonTrackRegex.Match(url).Value : _amazonAlbumRegex.Match(url).Value;
                 var title = item?["secondaryText"]?.ToString();
