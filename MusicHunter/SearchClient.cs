@@ -17,7 +17,6 @@ using System.Net;
 using Uthef.MusicHunter.Filters;
 using Uthef.MusicHunter.AmazonModels;
 using System.Text.Json.Nodes;
-using System.Diagnostics;
 
 namespace Uthef.MusicHunter
 {
@@ -396,7 +395,7 @@ namespace Uthef.MusicHunter
                 Limit = limit
             };
 
-            var response = await _spotifyClient.Search.Item(searchRequest).WaitAsync(cancellationToken);
+            var response = await _spotifyClient.Search.Item(searchRequest, cancellationToken).WaitAsync(cancellationToken);
 
             if (itemType is ItemType.Track && response.Tracks.Items != null)
             {

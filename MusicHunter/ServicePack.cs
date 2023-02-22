@@ -4,13 +4,8 @@ namespace Uthef.MusicHunter
 {
     public static class ServicePack
     {
-        public static readonly MusicService All;
         public static readonly ImmutableList<MusicService> AsList = Enum.GetValues<MusicService>().ToImmutableList();
-
-        static ServicePack()
-        {
-            foreach (var service in AsList) All |= service;
-        }
+        public static readonly MusicService All = (MusicService)Math.Pow(2, AsList.Count) - 1;
 
         public static int Count(MusicService services)
         {
