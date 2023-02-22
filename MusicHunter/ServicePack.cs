@@ -2,34 +2,27 @@
 
 namespace Uthef.MusicHunter
 {
-    public class ServicePack
+    public static class ServicePack
     {
-        public readonly ImmutableHashSet<MusicService> Items;
-        public readonly static ServicePack All;
-
-        public ServicePack(IEnumerable<MusicService> services)
-        {
-            Items = services.ToImmutableHashSet();
-        }
-
-        public ServicePack(params MusicService[] services)
-        {
-            Items = services.ToImmutableHashSet();
-        }
+        public static readonly MusicService All;
+        public static readonly ImmutableList<MusicService> AsList = Enum.GetValues<MusicService>().ToImmutableList();
 
         static ServicePack()
         {
-            All = new ServicePack(Enum.GetValues<MusicService>());
+            foreach (var service in AsList) All |= service;
         }
 
-        public static implicit operator ServicePack(MusicService service)
+        public static int Count(MusicService services)
         {
-            return new ServicePack(service);
+            var count = 0;
+
+            foreach (var service in AsList)
+            {
+                if ((service & services) != 0) count++;
+            }
+
+            return count;
         }
 
-        public static implicit operator ServicePack(HashSet<MusicService> services)
-        {
-            return new ServicePack(services);
-        }
     }
 }

@@ -17,6 +17,7 @@ using System.Net;
 using Uthef.MusicHunter.Filters;
 using Uthef.MusicHunter.AmazonModels;
 using System.Text.Json.Nodes;
+using System.Diagnostics;
 
 namespace Uthef.MusicHunter
 {
@@ -88,14 +89,16 @@ namespace Uthef.MusicHunter
         }
 
         public async Task<SearchResult> SearchAsync(string query, ItemType itemType, 
-            ServicePack pack, ISearchFilter? filter = null, CancellationToken cancellationToken = default)
+            MusicService services, ISearchFilter? filter = null, CancellationToken cancellationToken = default)
         {
             List<SearchItem> searchItems = new();
             List<ExceptionView> exceptions = new();
             List<Task> tasks = new();
 
-            foreach (var service in pack.Items)
+            foreach (var service in ServicePack.AsList)
             {
+                if ((services & service) == 0) continue;
+
                 var task = _methods[service].Invoke(query, itemType, filter?.Limit ?? DefaultLimit, cancellationToken);
                 var stamp = DateTime.Now;
 

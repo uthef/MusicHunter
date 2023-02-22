@@ -57,25 +57,25 @@ namespace MusicHunterTests
         public async Task TestYouTubeAndSoundCloudStrictly(string query, ItemType itemType, string strictArtist, string strictTitle)
         {
             var filter = new StrictFilter(strictArtist, strictTitle);
-            var servicePack = new ServicePack(MusicService.YouTube, MusicService.SoundCloud);
-            var resultCollection = await _searchClient.SearchAsync(query, itemType, servicePack, filter);
-            AssertSearchResultWithOutput(resultCollection, servicePack);
+            var services = MusicService.YouTube | MusicService.SoundCloud;
+            var resultCollection = await _searchClient.SearchAsync(query, itemType, services, filter);
+            AssertSearchResultWithOutput(resultCollection, services);
         }
 
         [TestCase("ic3peak - грустная сука", ItemType.Track)]
         public async Task TestSoundCloud(string query, ItemType type)
         {
-            var servicePack = MusicService.SoundCloud;
-            var resultCollection = await _searchClient.SearchAsync(query, type, servicePack);
-            AssertSearchResultWithOutput(resultCollection, servicePack);
+            var services = MusicService.SoundCloud;
+            var resultCollection = await _searchClient.SearchAsync(query, type, services);
+            AssertSearchResultWithOutput(resultCollection, services);
         }
 
         [TestCase("five crumbs", ItemType.Album)]
         public async Task TestBandcamp(string query, ItemType type)
         {
-            var servicePack = MusicService.Bandcamp;
-            var resultCollection = await _searchClient.SearchAsync(query, type, servicePack);
-            AssertSearchResultWithOutput(resultCollection, servicePack);
+            var services = MusicService.Bandcamp;
+            var resultCollection = await _searchClient.SearchAsync(query, type, services);
+            AssertSearchResultWithOutput(resultCollection, services);
         }
 
         [TestCase("baldocaster - moonrise", ItemType.Album)]
@@ -86,7 +86,7 @@ namespace MusicHunterTests
             AssertSearchResultWithOutput(result, MusicService.Amazon);
         }
 
-        private void AssertSearchResultWithOutput(SearchResult resultCollection, ServicePack pack)
+        private void AssertSearchResultWithOutput(SearchResult resultCollection, MusicService services)
         {
             if (resultCollection.Exceptions.Count > 0)
             {
@@ -100,7 +100,7 @@ namespace MusicHunterTests
             TestContext.WriteLine("The following items have been found:");
             TestContext.WriteLine(JsonSerializer.Serialize(resultCollection, JsonSerializerOptions));
 
-            Assert.That(resultCollection.Items, Has.Exactly(pack.Items.Count).Matches<SearchItem>(x => pack.Items.Contains(x.Service)));
+            Assert.That(resultCollection.Items, Has.Exactly(ServicePack.Count(services)).Matches<SearchItem>(x => (x.Service & services) != 0));
         }
     }
 }
