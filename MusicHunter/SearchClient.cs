@@ -26,7 +26,7 @@ namespace Uthef.MusicHunter
         public const string YouTubeUrlPart = "https://music.youtube.com";
         public const string YandexUrlPart = "https://music.yandex.ru";
         public const string SoundCloudSearchApiUrlPart = "https://api-v2.soundcloud.com";
-        public const string SoundCloudApiResolverUrlPart = "https://apiresolver-r8gd.onrender.com/sc";
+        public const string SoundCloudApiResolverUrlPart = "https://apiresolverasp.onrender.com/sc";
 
         public const int DefaultLimit = 24;
 
